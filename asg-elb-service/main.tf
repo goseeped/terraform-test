@@ -96,7 +96,7 @@ data "aws_ami" "ubuntu" {
 
 
 module "network_fgv_webrtc" {
-  source = "../network/fgv_webrtc"
+  source = "https://github.com/goseeped/terraform-test.git?ref=v0.0.1//network/fgv_webrtc"
 
   aws_region   = "${var.aws_region}"
   name         = "${var.name}"
