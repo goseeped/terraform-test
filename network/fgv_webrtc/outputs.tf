@@ -1,15 +1,9 @@
-output "url" {
-  value = "http://${aws_elb.webserver_example.dns_name}:${var.elb_port}"
+
+output "elb_name_new" {
+  value = "${aws_elb.webserver_example.name}"
 }
 
-output "elb_dns_name" {
-  value = "${aws_elb.webserver_example.dns_name}"
-}
-
-output "asg_security_group_id" {
+output "asg_id" {
   value = "${aws_security_group.asg.id}"
 }
 
-output "elb_security_group_id" {
-  value = "${aws_security_group.elb.id}"
-}

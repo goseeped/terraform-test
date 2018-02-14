@@ -17,30 +17,7 @@ terraform {
   backend "s3" {}
 }
 
-# ---------------------------------------------------------------------------------------------------------------------
-# CREATE AN ELB TO ROUTE TRAFFIC ACROSS THE ASG
-# ---------------------------------------------------------------------------------------------------------------------
-
-resource "aws_elb" "webserver_example" {
-  name               = "${var.name}"
-  availability_zones = ["${data.aws_availability_zones.all.names}"]
-  security_groups    = ["${aws_security_group.elb.id}"]
-
-  listener {
-    lb_port           = "${var.elb_port}"
-    lb_protocol       = "http"
-    instance_port     = "${var.server_port}"
-    instance_protocol = "http"
-  }
-
-  health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 2
-    timeout             = 3
-    interval            = 30
-    target              = "HTTP:${var.server_port}/"
-  }
-}
+data "aws_availability_zones" "all" {}
 
 # ---------------------------------------------------------------------------------------------------------------------
 # CREATE A SECURITY GROUP FOR THE ASG
@@ -95,24 +72,30 @@ resource "aws_security_group_rule" "elb_allow_all_outbound" {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
-# CREATE A SECURITY GROUP FOR THE ASG
-# To keep the example simple, we configure the EC2 Instances to allow inbound traffic from anywhere. In real-world
-# usage, you should lock the Instances down so they only allow traffic from trusted sources (e.g. the ELB).
+# CREATE AN ELB TO ROUTE TRAFFIC ACROSS THE ASG
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "aws_security_group" "asg" {
-  name = "${var.name}-asg"
+resource "aws_elb" "webserver_example" {
+  name               = "${var.name}"
+  availability_zones = ["${data.aws_availability_zones.all.names}"]
+  security_groups    = ["${aws_security_group.elb.id}"]
 
-  lifecycle {
-    create_before_destroy = true
+  listener {
+    lb_port           = "${var.elb_port}"
+    lb_protocol       = "http"
+    instance_port     = "${var.server_port}"
+    instance_protocol = "http"
+  }
+
+  health_check {
+    healthy_threshold   = 2
+    unhealthy_threshold = 2
+    timeout             = 3
+    interval            = 30
+    target              = "HTTP:${var.server_port}/"
   }
 }
 
-resource "aws_security_group_rule" "asg_allow_http_inbound" {
-  type              = "ingress"
-  from_port         = "${var.server_port}"
-  to_port           = "${var.server_port}"
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-  security_group_id = "${aws_security_group.asg.id}"
+output "elb_name_new" {
+  value = "${aws_elb.webserver_example.name}"
 }
