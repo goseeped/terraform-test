@@ -96,6 +96,3 @@ resource "aws_elb" "webserver_example" {
   }
 }
 
-output "elb_name_new" {
-  value = "${aws_elb.webserver_example.name}"
-}
